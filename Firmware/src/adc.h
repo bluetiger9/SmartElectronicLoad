@@ -34,7 +34,12 @@ public:
     }
   }
 
-  uint16_t get(uint8_t chan) {
+  uint16_t getRaw(uint8_t chan) {
+    return this->values[chan];
+  }
+
+  uint16_t getMilliVolts(uint8_t chan) {
+    // note: raw currently are current in millivolts
     return this->values[chan];
   }
 

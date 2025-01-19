@@ -7,23 +7,38 @@
 
 #include "dac.h"
 #include "adc.h"
+#include "fan.h"
 #include "load.h"
 #include "web.h"
 #include "wifi.h"
 #include "ota.h"
+#include "srv.h"
+#include "hw.h"
 
 /* Pin Configuration */
 
 const uint8_t PROG_PIN = 0;
 const uint8_t LED_PIN = 21;
-const uint8_t BTN_PIN = 47; // pin 33 on ESP32-S2
+
+#if defined ESP32_S3
+const uint8_t BTN_PIN = 47;
+#elif defined ESP32_S2
+const uint8_t BTN_PIN = 33;
+#endif
 
 const uint8_t VOLTAGE_SENSE_PIN = 6;
 const uint8_t CURRENT_SENSE_PIN_1 = 10;
 const uint8_t CURRENT_SENSE_PIN_2 = 9;
 const uint8_t TEMP_SENSE_PIN = 5;
 
-const uint8_t DAC_PIN_0 = 48; // pin 34 on ESP32-S2
+const uint8_t FAN_PIN = 3;
+
+#if defined ESP32_S3
+const uint8_t DAC_PIN_0 = 48;
+#elif defined ESP32_S2
+const uint8_t DAC_PIN_0 = 34;
+#endif
+
 const uint8_t DAC_PIN_1 = 14;
 const uint8_t DAC_PIN_2 = 35;
 const uint8_t DAC_PIN_3 = 36;
@@ -35,8 +50,8 @@ const uint8_t DAC_PIN_7 = 40;
 
 const uint8_t DAC_PIN_8 = 41;
 const uint8_t DAC_PIN_9 = 42;
-const uint8_t DAC_PIN_10 = 44;
-const uint8_t DAC_PIN_11 = 43;
+const uint8_t DAC_PIN_10 = 44;    // not used
+const uint8_t DAC_PIN_11 = 43;    // not used
 
 const uint8_t DAC_PIN_12 = 2;
 const uint8_t DAC_PIN_13 = 1;
@@ -60,22 +75,33 @@ DAC dac(NR_DAC_PINS, DAC_PINS, 8);
 
 ADC adc(NR_ADC_PINS, ADC_PINS);
 
-Load load(dac, adc);
+Fan fan(FAN_PIN, 255);
+
+Load load(dac, adc, fan);
 
 Wireless wifi;
 
-WebServer webServer(80, load);
+Service srv(dac);
+
+WebServer webServer(80, load, srv);
 
 OTA ota;
 
 bool progMode = false;
 
 void setup() {
+  HardwareValues::init();
+
   Serial.begin(115200);
 
   pinMode(PROG_PIN, INPUT);
   pinMode(BTN_PIN, INPUT_PULLUP);
   pinMode(LED_PIN, OUTPUT);
+
+  pinMode(FAN_PIN, OUTPUT);
+  analogWriteFrequency(25000);
+
+  fan.set(0.00);
 
   for (auto nr = 0; nr < NR_DAC_PINS; nr++) {
     pinMode(DAC_PINS[nr], OUTPUT);

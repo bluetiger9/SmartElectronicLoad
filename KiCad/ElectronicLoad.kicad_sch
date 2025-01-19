@@ -12081,6 +12081,26 @@
 		)
 		(uuid "129bff02-fa2d-476b-a448-1592fe9b03fa")
 	)
+	(text "*or 10 / 100 mOhm"
+		(exclude_from_sim no)
+		(at 122.428 71.882 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "301b5ff2-d813-4e27-b299-0c3a79a600a5")
+	)
+	(text "*sets bandwidth with R9"
+		(exclude_from_sim no)
+		(at 91.694 56.388 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "3c8bf7fb-7995-44ff-8eb9-1f25966091e8")
+	)
 	(text "*0-10V"
 		(exclude_from_sim no)
 		(at 38.862 34.29 0)
@@ -14457,7 +14477,7 @@
 				)
 			)
 		)
-		(property "Value" "LM2904"
+		(property "Value" "opamp"
 			(at 72.136 62.23 0)
 			(effects
 				(font
@@ -14542,7 +14562,7 @@
 				)
 			)
 		)
-		(property "Value" "47k*"
+		(property "Value" "1k*"
 			(at 75.184 128.524 0)
 			(effects
 				(font
@@ -20448,7 +20468,7 @@
 				)
 			)
 		)
-		(property "Value" "LM2904"
+		(property "Value" "opamp"
 			(at 82.804 33.02 0)
 			(effects
 				(font
@@ -21540,7 +21560,7 @@
 				)
 			)
 		)
-		(property "Value" "10pF (tbd)"
+		(property "Value" "1nF (tbd)"
 			(at 87.63 53.086 90)
 			(effects
 				(font
@@ -22002,14 +22022,14 @@
 		(dnp no)
 		(uuid "848236ab-08d7-4c37-86f6-aa71444692bb")
 		(property "Reference" "U1"
-			(at 171.45 61.214 0)
+			(at 171.958 61.468 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "LM2904"
+		(property "Value" "opamp"
 			(at 173.228 63.246 0)
 			(effects
 				(font
@@ -22769,7 +22789,7 @@
 				(justify right)
 			)
 		)
-		(property "Value" "LM2904"
+		(property "Value" "opamp"
 			(at 279.908 201.422 0)
 			(effects
 				(font
@@ -23658,7 +23678,7 @@
 				(justify right)
 			)
 		)
-		(property "Value" "LM2904"
+		(property "Value" "opamp"
 			(at 241.554 77.47 0)
 			(effects
 				(font
@@ -24361,7 +24381,7 @@
 				)
 			)
 		)
-		(property "Value" "LM2904"
+		(property "Value" "opamp"
 			(at 243.078 204.216 0)
 			(effects
 				(font
@@ -26582,7 +26602,7 @@
 				(justify right)
 			)
 		)
-		(property "Value" "LM2904"
+		(property "Value" "opamp"
 			(at 241.808 68.072 0)
 			(effects
 				(font
@@ -28806,7 +28826,7 @@
 				)
 			)
 		)
-		(property "Value" "10pF (tbd)"
+		(property "Value" "1nF (tbd)"
 			(at 163.068 52.578 90)
 			(effects
 				(font
@@ -29282,7 +29302,7 @@
 				)
 			)
 		)
-		(property "Value" "LM2904"
+		(property "Value" "opamp"
 			(at 241.554 170.18 0)
 			(effects
 				(font
@@ -29758,7 +29778,6 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "dcad062b-019a-4f33-8748-349ed8b6453c")
 		(property "Reference" "RS1"
 			(at 113.03 66.0399 0)
@@ -30715,7 +30734,7 @@
 				)
 			)
 		)
-		(property "Value" "1k*"
+		(property "Value" "47k*"
 			(at 78.74 115.57 90)
 			(effects
 				(font
@@ -32391,15 +32410,15 @@
 		(dnp no)
 		(uuid "ffb8b339-45d2-4be6-9fa3-9431996d0f32")
 		(property "Reference" "U2"
-			(at 161.29 32.004 0)
+			(at 159.766 31.242 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "LM2904"
-			(at 159.512 34.036 0)
+		(property "Value" "opamp"
+			(at 161.29 33.274 0)
 			(effects
 				(font
 					(size 1.27 1.27)
