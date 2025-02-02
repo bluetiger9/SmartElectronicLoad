@@ -7,7 +7,10 @@
 #define SRV_H
 
 #include <Arduino.h>
+#include <EEPROM.h>
 #include "dac.h"
+
+extern volatile uint8_t restartRequest;
 
 /** Test / service functionality */
 class Service {
@@ -17,8 +20,8 @@ public:
   /**
    * Instantiates the Web Server.
    */
-  Service(DAC &dac)
-    : dac(dac) {
+  Service(DAC &dac, ADC &adc)
+    : dac(dac), adc(adc) {
   }
 
   void dacSet(uint16_t value) {
@@ -37,11 +40,19 @@ public:
     }
   }
 
+  void progModeRestart() {
+    Serial.println("Requesting programming mode restart...");
+    restartRequest = 2;
+  }
+
+  void restart() {
+    Serial.println("Requesting normal restart...");
+    restartRequest = 1;
+  }
+
 private:
   DAC& dac;
-
-
-
+  ADC& adc;
 };
 
 #endif

@@ -30,7 +30,9 @@ public:
         Serial.println("\nEnd");
       })
       .onProgress([](unsigned int progress, unsigned int total) {
-        Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+        if ((progress % 10 == 0) || (progress > 90)) {
+          Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+        }
       })
       .onError([](ota_error_t error) {
         Serial.printf("Error[%u]: ", error);

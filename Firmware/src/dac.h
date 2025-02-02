@@ -3,10 +3,12 @@
  *
  * Licence: MIT
  */
-#include <Arduino.h>
 
 #ifndef DAC_H
 #define DAC_H
+
+#include <Arduino.h>
+#include "hal/gpio_hal.h"
 
 /** Digital to Analog Converter (DAC) implemented on hardware in R-2R configuration. */
 class DAC {

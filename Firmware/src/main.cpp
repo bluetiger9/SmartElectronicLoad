@@ -4,6 +4,9 @@
  * Licence: MIT
  */
 #include <Arduino.h>
+#include <EEPROM.h>
+
+#include "hal/gpio_hal.h"
 
 #include "dac.h"
 #include "adc.h"
@@ -81,13 +84,81 @@ Load load(dac, adc, fan);
 
 Wireless wifi;
 
-Service srv(dac);
+Service srv(dac, adc);
 
 WebServer webServer(80, load, srv);
 
 OTA ota;
 
+#define EEPROM_SIZE 4
+
+volatile uint8_t restartRequest = 0;
 bool progMode = false;
+
+// Global mutex
+portMUX_TYPE mutex = portMUX_INITIALIZER_UNLOCKED;
+
+/** Control loop task (priority=2) */
+void controlLoopTask(void *pvParameters) {
+  Serial.println("Control loop task started.");
+
+  // begin ADC readings
+  adc.begin();
+
+  while (true) {
+    for (uint64_t idx = 0; idx < 10000; idx++) {
+      load.handle();
+
+      // GPIO.out_w1tc = ((uint32_t) 1 << LED_PIN);
+      // GPIO.out_w1tc = ((uint32_t) 1 << LED_PIN);
+      // GPIO.out_w1ts = ((uint32_t) 1 << LED_PIN);
+    }
+
+    if (restartRequest > 0) {
+      taskENTER_CRITICAL(&mutex);
+
+      if (restartRequest == 2) {
+        // OTA restart
+        EEPROM.begin(4);
+
+        Serial.println("Setting EEPROM programming mode...");
+        EEPROM.write(0, 1);
+        EEPROM.commit();
+      }
+
+      Serial.println("Restarting ESP32...");
+      Serial.flush();
+
+      esp_restart();
+
+      taskEXIT_CRITICAL(&mutex);
+      return;
+    }
+
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    // let other tasks run
+    taskYIELD();
+  }
+}
+
+/** Critical control loop task (priority=10) */
+void criticalControlLoopTask(void *pvParameters) {
+  Serial.println("Critical control loop task started.");
+
+  while (true) {
+    // note: this will only run on request
+
+    // sleep for now
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+  }
+}
+
+/** Control loop task handle */
+TaskHandle_t controlLoopTaskHandle;
+
+/** Critical control loop task handle */
+TaskHandle_t criticalControlLoopTaskHandle;
 
 void setup() {
   HardwareValues::init();
@@ -99,7 +170,7 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
 
   pinMode(FAN_PIN, OUTPUT);
-  analogWriteFrequency(25000);
+  //analogWriteFrequency(FAN_PIN, 25000);
 
   fan.set(0.00);
 
@@ -109,29 +180,96 @@ void setup() {
 
   for (auto nr = 0; nr < NR_ADC_PINS; nr++) {
     pinMode(ADC_PINS[nr], INPUT);
-    adcAttachPin(ADC_PINS[nr]);
+    //adcAttachPin(ADC_PINS[nr]); todo
   }
 
-  if (digitalRead(BTN_PIN) == 0) {
+  EEPROM.begin(EEPROM_SIZE);
+
+  int persProgMode = EEPROM.read(0);
+
+  Serial.printf("EEPROM prog mode flag: %d\n", persProgMode);
+  if (persProgMode > 0) {
+    // prog mode requested
+    progMode = true;
+    EEPROM.write(0, 0); // Reset flag
+    EEPROM.commit();
+    Serial.println("Programming mode requested...");
+  }
+
+  if (progMode || digitalRead(BTN_PIN) == 0) {
     // enable prog mode
     progMode = true;
     Serial.println("Programming mode...");
   }
 
+  // start WiFi
   wifi.begin();
 
+  // Initialize LittleFS
+  if (!LittleFS.begin()) {
+    Serial.println("Failed to mount LittleFS");
+    return;
+  }
+
+  Serial.println("Content:");
+  File dir = LittleFS.open("/");
+  File file = dir.openNextFile();
+  char buf[1024];
+  while (file) {
+     Serial.println(file.name());
+     file = dir.openNextFile();
+  }
+
+  // start the web server
   webServer.begin();
 
   if (progMode) {
     ota.begin();
+    return;
   }
+
+  // create control loop task
+  Serial.println("Creating control loop and critical control loop tasks...");
+
+  // wrap task creation in a critical section
+  taskENTER_CRITICAL(&mutex);
+
+  // create control loop task
+  auto retval = xTaskCreate(
+      controlLoopTask,        // Task function
+      "ControlLoopTask",      // Name of the task
+      2048,                   // Stack size
+      NULL,                   // Task parameter
+      1,                      // Priority (higher than loop()'s priority 1)
+      &controlLoopTaskHandle  // Task handle
+  );
+
+  if (retval != pdPASS) {
+    Serial.println("Creation of control loop task FAILED!");
+    return;
+  }
+
+  // create critical control loop task
+  retval = xTaskCreate(
+      criticalControlLoopTask,        // Task function
+      "CriticalControlLoopTask",      // Name of the task
+      2048,                           // Stack size
+      NULL,                           // Task parameter
+      5,                              // Priority (higher than loop()'s priority 1)
+      &criticalControlLoopTaskHandle  // Task handle
+  );
+
+  if (retval != pdPASS) {
+    Serial.println("Creation of critical control loop task FAILED!");
+    return;
+  }
+
+  // end of critical section
+  taskEXIT_CRITICAL(&mutex);
 }
 
 void loop() {
   if (progMode) {
     ota.handle();
-
-  } else {
-    load.handle();
   }
 }

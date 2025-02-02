@@ -86,10 +86,12 @@ public:
     return this->adc.getMilliVolts(0);
   }
 
+  /** Get the raw Load Current reading (in millivolts) */
   uint16_t getLoadCurrentRaw1() {
     return this->adc.getMilliVolts(1);
   }
 
+  /** Get the raw Load Current reading (in millivolts) */
   uint16_t getLoadCurrentRaw2() {
     return this->adc.getMilliVolts(2);
   }

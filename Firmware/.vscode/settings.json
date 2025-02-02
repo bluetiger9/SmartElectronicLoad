@@ -11,6 +11,23 @@
         "ostream": "cpp",
         "system_error": "cpp",
         "regex": "cpp",
-        "type_traits": "cpp"
-    }
+        "type_traits": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp"
+    },
+    "cSpell.words": [
+        "ASYNCWEBSERVER",
+        "EEPROM",
+        "espota",
+        "espressif",
+        "littlefs",
+        "pioarduino",
+        "saola",
+        "wroom"
+    ]
 }
