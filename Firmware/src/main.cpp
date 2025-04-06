@@ -5,6 +5,7 @@
  */
 #include <Arduino.h>
 #include <EEPROM.h>
+#include <Adafruit_TinyUSB.h>
 
 #include "hal/gpio_hal.h"
 
@@ -266,10 +267,16 @@ void setup() {
 
   // end of critical section
   taskEXIT_CRITICAL(&mutex);
+
+  if (!TinyUSBDevice.isInitialized()) {
+    TinyUSBDevice.begin(0);
+  }
+
 }
 
 void loop() {
   if (progMode) {
     ota.handle();
   }
+
 }

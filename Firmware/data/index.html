@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="style.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="container">
+        <div id="overlay">
+            <div id="current-set-form-container">
+                <div class="label">Set Current</div>
+                <form id="set-current-form">
+                    <input id="set-current-input" type="text" class="label value-medium"">
+                        <span class="value-large">A</span>
+                    </input>
+                </form>
+            </div>
+
+            <div id="fan-speed-form-container">
+                <div class="label">Fan Speed</div>
+                <form id="fan-speed-form">
+                    <input id="fan-speed-input" type="text" class="label value-medium"">
+                        <span class="value-large">%</span>
+                    </input>
+                </form>
+            </div>
+        </div>
+
+        <div id="left">
+            <div class="panel">
+                <div class="label">Mode</div>
+                <div class="value-small uppercase">Constant<br/>Current</div>
+            </div>
+            <div class="panel"></div>
+            <div class="panel">
+                <div class="label">Set Current</div>
+                <div class="value-medium">
+                    <span id="set-current">0.00</span>
+                    <span>A</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="center">
+            <div class="panel">
+                <div class="label">Current</div>
+                <div class="value-large">
+                    <span id="load-current"></span>
+                    <span>A</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="label">Voltage</div>
+                <div class="value-large">
+                    <span id="load-voltage"></span>
+                    <span>V</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="label">Power</div>
+                <div class="value-large">
+                    <span id="load-power"></span>
+                    <span>W</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="right">
+            <div class="panel">
+                <div class="label">Temperature</div>
+                <div class="value-medium">
+                    <span id="temperature">25.0</span>
+                    <span>°C</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="label">Fan</div>
+                <div class="value-medium">
+                    <span id="fan-speed">0</span>
+                    <span>%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="load.js" defer></script>
+</body>
+
+</html>

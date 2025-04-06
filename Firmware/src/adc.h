@@ -45,19 +45,31 @@ public:
     Serial.println("Setting up continuous ADC reads...");
     analogContinuousSetWidth(12);
     analogContinuousSetAtten(ADC_11db);
-    analogContinuous(pins, nrChannels, ADC_CONTINUOUS_CONVERSIONS_PER_PIN, ADC_CONTINUOUS_FREQ, &adcComplete);
+    if (!analogContinuous(pins, nrChannels, ADC_CONTINUOUS_CONVERSIONS_PER_PIN, ADC_CONTINUOUS_FREQ, &adcComplete)) {
+      Serial.println("Continuous ADC setup ERROR!");
+      return;
+    };
 
     // start continuous ADC reads
     Serial.println("Starting continuous ADC reads...");
-    analogContinuousStart();
+    if (!analogContinuousStart()) {
+      Serial.println("Continuous ADC start ERROR!");
+      return;
+    }
   }
 
   void pause() {
-    analogContinuousStop();
+    Serial.print("P!");
+    if (!analogContinuousStop()) {
+      Serial.println("Continuous ADC stop (pause) ERROR!");
+    }
   }
 
   void resume() {
-    analogContinuousStart();
+    Serial.print("R!");
+    if (!analogContinuousStart()) {
+      Serial.println("Continuous ADC restart ERROR!");
+    }
   }
 
   /** Consumes the continuous ADC read values (called by the continuous ADC callback) */
@@ -69,8 +81,12 @@ public:
 
     // save the avg ADC value
     for (int chan = 0; chan < this->nrChannels; chan++) {
+      #ifdef ESP32_S2
       // why the 2x multiplier is needed?
       this->values[chan] = 2 * result[chan].avg_read_mvolts;
+      #else // S3
+      this->values[chan] = result[chan].avg_read_mvolts;
+      #endif
     }
   }
 
