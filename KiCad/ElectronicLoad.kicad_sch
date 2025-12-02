@@ -6401,6 +6401,16 @@
 		)
 		(uuid "54f01eed-b60e-4301-83a3-b0e252934a02")
 	)
+	(text "2k (1%)"
+		(exclude_from_sim no)
+		(at 221.234 235.712 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "58abcc0e-f454-454f-b5b4-58432235973f")
+	)
 	(text "*div by 48"
 		(exclude_from_sim no)
 		(at 22.606 133.858 0)
@@ -6432,6 +6442,16 @@
 			)
 		)
 		(uuid "8b990419-cbc7-4c52-9c17-1ced7422453a")
+	)
+	(text "1k (1%)"
+		(exclude_from_sim no)
+		(at 256.032 263.144 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "ac185d15-1a95-434f-b29d-1cc930bdae0e")
 	)
 	(text "Current Sense MCU"
 		(exclude_from_sim no)
@@ -13573,7 +13593,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 240.03 90)
 			(effects
 				(font
@@ -14103,7 +14123,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 257.81 90)
 			(effects
 				(font
@@ -14258,8 +14278,8 @@
 				)
 			)
 		)
-		(property "Value" "10k*"
-			(at 25.146 143.764 0)
+		(property "Value" "10k (1%)"
+			(at 23.368 143.764 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14392,7 +14412,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 234.95 90)
 			(effects
 				(font
@@ -14595,8 +14615,8 @@
 				)
 			)
 		)
-		(property "Value" "3.3pF (tbd)"
-			(at 289.814 245.618 0)
+		(property "Value" "100pF"
+			(at 287.782 245.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -14753,7 +14773,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 252.73 90)
 			(effects
 				(font
@@ -14967,7 +14987,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 267.97 90)
 			(effects
 				(font
@@ -15453,7 +15473,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "1k (1%)"
 			(at 218.44 270.51 90)
 			(effects
 				(font
@@ -15800,8 +15820,8 @@
 				)
 			)
 		)
-		(property "Value" "22pF (tbd)"
-			(at 97.282 130.556 0)
+		(property "Value" "100pF"
+			(at 94.488 130.556 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16079,7 +16099,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 276.86 90)
 			(effects
 				(font
@@ -16292,7 +16312,7 @@
 				)
 			)
 		)
-		(property "Value" "1"
+		(property "Value" "10"
 			(at 361.696 88.392 90)
 			(effects
 				(font
@@ -16428,7 +16448,7 @@
 				)
 			)
 		)
-		(property "Value" "D_Small"
+		(property "Value" "Schottky"
 			(at 370.84 67.31 0)
 			(effects
 				(font
@@ -16647,7 +16667,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 247.65 90)
 			(effects
 				(font
@@ -17187,8 +17207,8 @@
 				)
 			)
 		)
-		(property "Value" "22pF (tbd)"
-			(at 97.282 143.256 0)
+		(property "Value" "100pF"
+			(at 94.996 143.51 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -17255,7 +17275,7 @@
 				)
 			)
 		)
-		(property "Value" "0*"
+		(property "Value" "0"
 			(at 25.654 119.38 0)
 			(effects
 				(font
@@ -17459,7 +17479,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 265.43 90)
 			(effects
 				(font
@@ -17733,7 +17753,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "1k (1%)"
 			(at 259.08 250.19 90)
 			(effects
 				(font
@@ -18197,7 +18217,7 @@
 				)
 			)
 		)
-		(property "Value" "1M"
+		(property "Value" "100k"
 			(at 35.56 125.476 90)
 			(effects
 				(font
@@ -18482,7 +18502,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "1k (1%)"
 			(at 264.16 247.65 90)
 			(effects
 				(font
@@ -19172,8 +19192,8 @@
 				)
 			)
 		)
-		(property "Value" "100pF (tbd)"
-			(at 259.08 216.916 0)
+		(property "Value" "4.7nF"
+			(at 255.778 216.916 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20065,7 +20085,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "1k (1%)"
 			(at 233.68 262.89 90)
 			(effects
 				(font
@@ -20406,8 +20426,8 @@
 				)
 			)
 		)
-		(property "Value" "1nF (tbd)"
-			(at 87.63 53.086 90)
+		(property "Value" "4.7nF"
+			(at 85.598 52.832 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -20988,8 +21008,8 @@
 				)
 			)
 		)
-		(property "Value" "22pF (tbd)"
-			(at 221.742 143.256 0)
+		(property "Value" "4.7nF"
+			(at 218.948 143.256 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -21055,8 +21075,8 @@
 				)
 			)
 		)
-		(property "Value" "1ohm"
-			(at 275.082 194.564 0)
+		(property "Value" "dnp"
+			(at 275.844 194.564 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -21256,7 +21276,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 255.27 90)
 			(effects
 				(font
@@ -21456,8 +21476,8 @@
 				)
 			)
 		)
-		(property "Value" "22pF (tbd)"
-			(at 221.742 130.556 0)
+		(property "Value" "4.7nF"
+			(at 218.948 130.556 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -21523,7 +21543,7 @@
 				)
 			)
 		)
-		(property "Value" "10"
+		(property "Value" "dnp"
 			(at 244.348 40.894 0)
 			(effects
 				(font
@@ -21592,7 +21612,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "1k (1%)"
 			(at 228.6 265.43 90)
 			(effects
 				(font
@@ -21729,7 +21749,7 @@
 				)
 			)
 		)
-		(property "Value" "12k"
+		(property "Value" "22k"
 			(at 325.628 98.044 0)
 			(effects
 				(font
@@ -21862,7 +21882,7 @@
 				)
 			)
 		)
-		(property "Value" "1M"
+		(property "Value" "100k"
 			(at 35.56 138.176 90)
 			(effects
 				(font
@@ -22063,8 +22083,8 @@
 				)
 			)
 		)
-		(property "Value" "dnp"
-			(at 287.782 194.564 0)
+		(property "Value" "1ohm"
+			(at 288.544 194.564 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22195,7 +22215,7 @@
 				)
 			)
 		)
-		(property "Value" "2.2k"
+		(property "Value" "3.3k"
 			(at 301.498 98.044 0)
 			(effects
 				(font
@@ -23034,7 +23054,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 242.57 90)
 			(effects
 				(font
@@ -23506,7 +23526,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "1k (1%)"
 			(at 238.76 260.35 90)
 			(effects
 				(font
@@ -23975,7 +23995,7 @@
 				)
 			)
 		)
-		(property "Value" "3.3k"
+		(property "Value" "10k"
 			(at 314.198 98.044 0)
 			(effects
 				(font
@@ -24044,7 +24064,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "1k (1%)"
 			(at 213.36 273.05 90)
 			(effects
 				(font
@@ -24377,7 +24397,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 262.89 90)
 			(effects
 				(font
@@ -25203,7 +25223,7 @@
 				)
 			)
 		)
-		(property "Value" "1ohm"
+		(property "Value" "10"
 			(at 146.05 35.56 90)
 			(effects
 				(font
@@ -25831,7 +25851,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "1k (1%)"
 			(at 223.52 267.97 90)
 			(effects
 				(font
@@ -26101,7 +26121,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "1k (1%)"
 			(at 254 252.73 90)
 			(effects
 				(font
@@ -26171,7 +26191,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "1k (1%)"
 			(at 248.92 255.27 90)
 			(effects
 				(font
@@ -26241,7 +26261,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 237.49 90)
 			(effects
 				(font
@@ -26443,7 +26463,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "1k (1%)"
 			(at 269.24 245.11 90)
 			(effects
 				(font
@@ -26692,7 +26712,7 @@
 				)
 			)
 		)
-		(property "Value" "1M"
+		(property "Value" "100k"
 			(at 162.56 138.176 90)
 			(effects
 				(font
@@ -27311,7 +27331,7 @@
 				)
 			)
 		)
-		(property "Value" "1nF (tbd)"
+		(property "Value" "4.7nF"
 			(at 163.068 52.578 90)
 			(effects
 				(font
@@ -27380,7 +27400,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "1k (1%)"
 			(at 274.32 242.57 90)
 			(effects
 				(font
@@ -28000,7 +28020,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "1k (1%)"
 			(at 243.84 257.81 90)
 			(effects
 				(font
@@ -28270,7 +28290,7 @@
 				)
 			)
 		)
-		(property "Value" "1"
+		(property "Value" "10"
 			(at 361.696 83.312 90)
 			(effects
 				(font
@@ -28817,15 +28837,15 @@
 		(dnp no)
 		(uuid "e2e99ed8-5b40-4ea9-aebe-c3ee706ff351")
 		(property "Reference" "R40"
-			(at 162.56 118.11 90)
+			(at 162.56 120.904 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "1M"
-			(at 162.56 120.65 90)
+		(property "Value" "100k"
+			(at 162.814 125.476 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -28958,7 +28978,7 @@
 				)
 			)
 		)
-		(property "Value" "1ohm"
+		(property "Value" "10"
 			(at 97.79 35.56 90)
 			(effects
 				(font
@@ -29094,8 +29114,8 @@
 				)
 			)
 		)
-		(property "Value" "470k*"
-			(at 25.654 129.54 0)
+		(property "Value" "100k (1%)"
+			(at 22.86 129.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -29498,7 +29518,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 250.19 90)
 			(effects
 				(font
@@ -29568,7 +29588,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 245.11 90)
 			(effects
 				(font
@@ -29772,13 +29792,12 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "0"
 			(at 285.75 234.95 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
@@ -30848,7 +30867,7 @@
 				(hide yes)
 			)
 		)
-		(property "Value" "R_Small"
+		(property "Value" "2k (1%)"
 			(at 210.82 260.35 90)
 			(effects
 				(font
