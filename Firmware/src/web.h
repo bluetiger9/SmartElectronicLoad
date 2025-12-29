@@ -66,6 +66,11 @@ public:
         this->handleApiLoadEnable(request, false);
       });
 
+      // State get
+      this->server.on("/api/state", HTTP_GET, [this](AsyncWebServerRequest *request) {
+        this->handleApiGetState(request);
+      });
+
       /** Service / Test API Handler **/
 
       // DAC set
@@ -195,6 +200,17 @@ private:
     this->srv.dacSet(value);
 
     this->sendFormattedJsonResponse(request, "OK");
+  }
+
+  /** Handle State get request */
+  void handleApiGetState(AsyncWebServerRequest *request) {
+    bool enabled = this->load.isEnabled();
+    float setCurrent = this->load.getSetCurrent();
+    float fanSpeed = this->load.getFanSpeed();
+
+    this->sendFormattedJsonResponse(request,
+      "{ \"enabled\": %s, \"setCurrent\": %.3f, \"fanSpeed\": %.2f }",
+      enabled ? "true" : "false", setCurrent, fanSpeed);
   }
 
   /** Handle DAC swipe request (service/test). */

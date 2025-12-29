@@ -21,7 +21,8 @@ public:
    * Instantiates the Electronic Load.
    */
   Load(DAC &dac, ADC &adc, Fan &fan, uint8_t pwrEnPin)
-    : dac(dac), adc(adc), fan(fan), pwrEnPin(pwrEnPin) {
+    : dac(dac), adc(adc), fan(fan), pwrEnPin(pwrEnPin),
+      enabled(false), current(0.0) {
 
       digitalWrite(this->pwrEnPin, LOW);
   }
@@ -68,7 +69,12 @@ public:
   }
 
   /** Enable / Disable the Load */
-  void setEnabled(bool enabled) {
+  bool setEnabled(bool enabled) {
+    if (this->enabled == enabled) {
+      // no state change
+      return true;
+    }
+
     if (enabled) {
       // TODO: move power enable into a separate method
       digitalWrite(this->pwrEnPin, HIGH);
@@ -81,14 +87,18 @@ public:
       // TODO: make delay time configurable
       delay(50);
     }
+
+    // save state
+    this->enabled = enabled;
+
+    return true;
   }
 
   /** Set the Load Current (in amps) */
-  void setCurrent(float current) {
-    if (current < 0.0) return;
-
-    if (current > HardwareValues::MAX_TOTAL_CURRENT) {
-      return;
+  bool setCurrent(float current) {
+    if ((current < 0.0) || (current > HardwareValues::MAX_TOTAL_CURRENT)) {
+      // invalid set current value
+      return false;
     }
 
     if (current > 0.0) {
@@ -96,6 +106,7 @@ public:
       this->setEnabled(true);
     }
 
+    // set the DAC value
     uint16_t dacValue = current * HardwareValues::currentSetDacMultiplier;
     this->dac.set(dacValue);
 
@@ -103,13 +114,27 @@ public:
       // auto-disable load when current is set to 0.0A (TODO: make this configurable)
       this->setEnabled(false);
     }
+
+    // save state
+    this->current = current;
+
+    return true;
   }
 
   /** Set the Fan Speed (0.0 to 1.0) */
-  void setFanSpeed(float speed) {
-    if (speed < 0.0 || speed > 1.0) return;
+  bool setFanSpeed(float speed) {
+    if (speed < 0.0 || speed > 1.0) {
+      // invalid fan speed
+      return false;
+    }
 
+    // set the fan speed
     this->fan.set(speed);
+
+    // save state
+    this->fanSpeed = speed;
+
+    return true;
   }
 
   /** Get Temperature (in Celsius). */
@@ -124,7 +149,6 @@ public:
     float tempC = tempK - 273.15;
 
     return tempC;
-    //return (float) tempMilliVolts;
   }
 
   /** Get the raw Load Voltage reading at the 1st division stage (in millivolts) */
@@ -152,11 +176,38 @@ public:
     return this->adc.getMilliVolts(3);
   }
 
+  /** Get Enabled state */
+  bool isEnabled() {
+    return this->enabled;
+  }
+
+  /** Get set current */
+  float getSetCurrent() {
+    return this->current;
+  }
+
+  /** Get fan speed */
+  float getFanSpeed() {
+    return this->fanSpeed;
+  }
+
 private:
   DAC &dac;
   ADC &adc;
   Fan &fan;
   const uint8_t pwrEnPin;
+
+  /* State: */
+
+  /** Load state (enabled/disabled) */
+  bool enabled;
+
+  /** Set current */
+  float current;
+
+  /** Fan speed */
+  float fanSpeed;
+
 };
 
 #endif
