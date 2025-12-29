@@ -56,6 +56,16 @@ public:
         this->handleApiSetFanSpeed(request, data, len, index, total);
       });
 
+      // Load enable
+      this->server.on("/api/enable", HTTP_PUT, [this](AsyncWebServerRequest *request) {
+        this->handleApiLoadEnable(request, true);
+      });
+
+      // Load disable
+      this->server.on("/api/disable", HTTP_PUT, [this](AsyncWebServerRequest *request) {
+        this->handleApiLoadEnable(request, false);
+      });
+
       /** Service / Test API Handler **/
 
       // DAC set
@@ -166,6 +176,13 @@ private:
     float value = atof(valueStr.c_str());
 
     this->load.setFanSpeed(value);
+
+    this->sendFormattedJsonResponse(request, "OK");
+  }
+
+  /** Handle Load Enable / Disable request */
+  void handleApiLoadEnable(AsyncWebServerRequest *request, bool enabled) {
+    this->load.setEnabled(enabled);
 
     this->sendFormattedJsonResponse(request, "OK");
   }

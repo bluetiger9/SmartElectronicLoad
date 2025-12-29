@@ -67,6 +67,22 @@ public:
     return loadCurrentRaw2 * HardwareValues::currentSenseAdcMultiplier;
   }
 
+  /** Enable / Disable the Load */
+  void setEnabled(bool enabled) {
+    if (enabled) {
+      // TODO: move power enable into a separate method
+      digitalWrite(this->pwrEnPin, HIGH);
+      // TODO: make delay time configurable
+      delay(50);
+
+    } else {
+      // TODO: move power disable into a separate method
+      digitalWrite(this->pwrEnPin, LOW);
+      // TODO: make delay time configurable
+      delay(50);
+    }
+  }
+
   /** Set the Load Current (in amps) */
   void setCurrent(float current) {
     if (current < 0.0) return;
@@ -76,20 +92,16 @@ public:
     }
 
     if (current > 0.0) {
-      // TODO: move power enable into a separate method
-      digitalWrite(this->pwrEnPin, HIGH);
-      // TODO: make delay time configurable
-      delay(50);
+      // auto-enable load when set current is >= 0.0A (TODO: make this configurable)
+      this->setEnabled(true);
     }
 
     uint16_t dacValue = current * HardwareValues::currentSetDacMultiplier;
     this->dac.set(dacValue);
 
     if (current == 0.0) {
-      // TODO: move power disable into a separate method
-      digitalWrite(this->pwrEnPin, LOW);
-      // TODO: make delay time configurable
-      delay(50);
+      // auto-disable load when current is set to 0.0A (TODO: make this configurable)
+      this->setEnabled(false);
     }
   }
 
