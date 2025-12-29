@@ -29,13 +29,15 @@ public:
   }
 
   void dacSwipe() {
+    int16_t maxValue = (1 << dac.nrPins) - 1;
+
     // swipe up
-    for (int16_t value = 0; value < 4096; value++) {
+    for (int16_t value = 0; value <= maxValue; value++) {
       dac.set(value);
     }
 
     // swipe down
-    for (int16_t value = 4096; value >= 0; value--) {
+    for (int16_t value = maxValue; value >= 0; value--) {
       dac.set(value);
     }
   }

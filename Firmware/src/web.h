@@ -176,11 +176,15 @@ private:
     uint16_t value = atoi(valueStr.c_str());
 
     this->srv.dacSet(value);
+
+    this->sendFormattedJsonResponse(request, "OK");
   }
 
   /** Handle DAC swipe request (service/test). */
   void handleApiSrvDacSwipe(AsyncWebServerRequest *request) {
     this->srv.dacSwipe();
+
+    this->sendFormattedJsonResponse(request, "OK");
   }
 
   /** Handle OTA restart (service/test). */

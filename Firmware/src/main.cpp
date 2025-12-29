@@ -30,12 +30,15 @@ const uint8_t BTN_PIN = 47;
 const uint8_t BTN_PIN = 33;
 #endif
 
-const uint8_t VOLTAGE_SENSE_PIN = 6;
+const uint8_t VOLTAGE_SENSE_PIN_1 = 6;
+const uint8_t VOLTAGE_SENSE_PIN_2 = 7;
 const uint8_t CURRENT_SENSE_PIN_1 = 10;
 const uint8_t CURRENT_SENSE_PIN_2 = 9;
 const uint8_t TEMP_SENSE_PIN = 5;
 
 const uint8_t FAN_PIN = 3;
+
+const uint8_t LOAD_PWR_EN_PIN = 8;
 
 #if defined ESP32_S3
 const uint8_t DAC_PIN_0 = 48;
@@ -50,29 +53,31 @@ const uint8_t DAC_PIN_3 = 36;
 const uint8_t DAC_PIN_4 = 37;
 const uint8_t DAC_PIN_5 = 38;
 const uint8_t DAC_PIN_6 = 39;
-const uint8_t DAC_PIN_7 = 40;
+const uint8_t DAC_PIN_7 = 1;
 
-const uint8_t DAC_PIN_8 = 41;
+const uint8_t DAC_PIN_8 = 2;
 const uint8_t DAC_PIN_9 = 42;
-const uint8_t DAC_PIN_10 = 44;    // not used
-const uint8_t DAC_PIN_11 = 43;    // not used
+const uint8_t DAC_PIN_10 = 12;
+const uint8_t DAC_PIN_11 = 13;
 
-const uint8_t DAC_PIN_12 = 2;
-const uint8_t DAC_PIN_13 = 1;
+const uint8_t DAC_PIN_12 = 41;
+const uint8_t DAC_PIN_13 = 40;
 
-const uint8_t NR_DAC_PINS = 12; // normally 14, pins 10 and 11 not used
+const uint8_t NR_DAC_PINS = 14;
 
 const uint8_t DAC_PINS[] = {
   DAC_PIN_0, DAC_PIN_1, DAC_PIN_2, DAC_PIN_3,
   DAC_PIN_4, DAC_PIN_5, DAC_PIN_6, DAC_PIN_7,
-  DAC_PIN_8, DAC_PIN_9, /*DAC_PIN_10, DAC_PIN_11,*/
+  DAC_PIN_8, DAC_PIN_9, DAC_PIN_10, DAC_PIN_11,
   DAC_PIN_12, DAC_PIN_13,
 };
 
-const uint8_t NR_ADC_PINS = 4;
+//const uint8_t NR_ADC_PINS = 5;
+const uint8_t NR_ADC_PINS = 5;
 
 const uint8_t ADC_PINS[] = {
-  VOLTAGE_SENSE_PIN, CURRENT_SENSE_PIN_1, CURRENT_SENSE_PIN_2, TEMP_SENSE_PIN
+  //VOLTAGE_SENSE_PIN_1, VOLTAGE_SENSE_PIN_2, CURRENT_SENSE_PIN_1, CURRENT_SENSE_PIN_2, TEMP_SENSE_PIN
+  VOLTAGE_SENSE_PIN_1, CURRENT_SENSE_PIN_1, CURRENT_SENSE_PIN_2, TEMP_SENSE_PIN, VOLTAGE_SENSE_PIN_2
 };
 
 DAC dac(NR_DAC_PINS, DAC_PINS, 8);
@@ -81,7 +86,7 @@ ADC adc(NR_ADC_PINS, ADC_PINS);
 
 Fan fan(FAN_PIN, 255);
 
-Load load(dac, adc, fan);
+Load load(dac, adc, fan, LOAD_PWR_EN_PIN);
 
 Wireless wifi;
 
@@ -171,6 +176,7 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
 
   pinMode(FAN_PIN, OUTPUT);
+  pinMode(LOAD_PWR_EN_PIN, OUTPUT);
   //analogWriteFrequency(FAN_PIN, 25000);
 
   fan.set(0.00);

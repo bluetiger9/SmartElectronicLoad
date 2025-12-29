@@ -8,6 +8,12 @@
 #ifndef ADC_H
 #define ADC_H
 
+/**
+ * Continuous ADC parameters:
+ *   - frequency: 83.333 kHz (max, overall for all pins)
+ *   - conversions per pin: 4
+ *   - effective per pin frequency: 83.333 kHz / 4 / 5 ~= 4.1 kHz
+ */
 const uint8_t ADC_CONTINUOUS_CONVERSIONS_PER_PIN = 4;
 const uint32_t ADC_CONTINUOUS_FREQ = 83333; // max freq
 

@@ -27,6 +27,7 @@
         "espressif",
         "littlefs",
         "pioarduino",
+        "PSRAM",
         "saola",
         "wroom"
     ]

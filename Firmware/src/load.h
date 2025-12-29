@@ -20,8 +20,10 @@ public:
   /**
    * Instantiates the Electronic Load.
    */
-  Load(DAC &dac, ADC &adc, Fan &fan)
-    : dac(dac), adc(adc), fan(fan) {
+  Load(DAC &dac, ADC &adc, Fan &fan, uint8_t pwrEnPin)
+    : dac(dac), adc(adc), fan(fan), pwrEnPin(pwrEnPin) {
+
+      digitalWrite(this->pwrEnPin, LOW);
   }
 
   void handle() {
@@ -30,8 +32,17 @@ public:
 
   /** Get the Load Voltage (in volts). */
   float getLoadVoltage() {
-     uint16_t loadVoltageRaw = this->getLoadVoltageRaw();
-     return loadVoltageRaw * HardwareValues::loadVoltageAdcMultiplier;
+    // get the load voltage from the 1st division stage
+    uint16_t loadVoltageRaw1 = this->getLoadVoltage1Raw();
+    if (loadVoltageRaw1 <= 2500) {
+      // bellow ~2.5V threshold => use the 1st division stage
+      return loadVoltageRaw1 * HardwareValues::loadVoltageAdcMultiplier1;
+
+    } else {
+      // above ~2.5V threshold the 1st division stage may be saturated => use the 2nd division stage
+      uint16_t loadVoltageRaw2 = this->getLoadVoltage2Raw();
+      return loadVoltageRaw2 * HardwareValues::loadVoltageAdcMultiplier2;
+    }
   }
 
   /** Get the full Load Current (in amps). */
@@ -47,6 +58,11 @@ public:
 
   /** Get the Load Current on channel two (in amps). */
   float getLoadCurrent2() {
+    if (HardwareValues::NR_CHANNELS <= 1.0) {
+      // ignore the 2nd channel (reduses noise when only 1 channel is used)
+      return 0.0;
+    }
+
     uint16_t loadCurrentRaw2 = this->adc.getMilliVolts(2);
     return loadCurrentRaw2 * HardwareValues::currentSenseAdcMultiplier;
   }
@@ -55,8 +71,26 @@ public:
   void setCurrent(float current) {
     if (current < 0.0) return;
 
-    uint16_t dacValue = current * HardwareValues::currentSetDacMultiplier / NR_CHANNELS;
+    if (current > HardwareValues::MAX_TOTAL_CURRENT) {
+      return;
+    }
+
+    if (current > 0.0) {
+      // TODO: move power enable into a separate method
+      digitalWrite(this->pwrEnPin, HIGH);
+      // TODO: make delay time configurable
+      delay(50);
+    }
+
+    uint16_t dacValue = current * HardwareValues::currentSetDacMultiplier;
     this->dac.set(dacValue);
+
+    if (current == 0.0) {
+      // TODO: move power disable into a separate method
+      digitalWrite(this->pwrEnPin, LOW);
+      // TODO: make delay time configurable
+      delay(50);
+    }
   }
 
   /** Set the Fan Speed (0.0 to 1.0) */
@@ -81,9 +115,14 @@ public:
     //return (float) tempMilliVolts;
   }
 
-  /** Get the raw Load Voltage reading (in millivolts) */
-  uint16_t getLoadVoltageRaw() {
+  /** Get the raw Load Voltage reading at the 1st division stage (in millivolts) */
+  uint16_t getLoadVoltage1Raw() {
     return this->adc.getMilliVolts(0);
+  }
+
+  /** Get the raw Load Voltage reading at the 2nd division stage (in millivolts) */
+  uint16_t getLoadVoltage2Raw() {
+    return this->adc.getMilliVolts(4);
   }
 
   /** Get the raw Load Current reading (in millivolts) */
@@ -105,9 +144,7 @@ private:
   DAC &dac;
   ADC &adc;
   Fan &fan;
-
-  /** Nr channels */
-  static constexpr float NR_CHANNELS = 2.0;
+  const uint8_t pwrEnPin;
 };
 
 #endif

@@ -74,7 +74,7 @@ private:
     p2_set = 0;
     p2_clear = 0;
 
-    for (auto nr = 0; nr < nrPins; nr++) {
+    for (auto nr = 0; nr < this->nrPins; nr++) {
       uint8_t pin = this->pins[nr];
       bool bitVal = value % 2;
       value = value >> 1;
