@@ -51,6 +51,16 @@ public:
         this->handleApiSetCurrent(request, data, len, index, total);
       });
 
+      // Power set
+      this->server.on("/api/power", HTTP_PUT, [this](AsyncWebServerRequest *request) {}, NULL, [this](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        this->handleApiSetPower(request, data, len, index, total);
+      });
+
+      // Resistance set
+      this->server.on("/api/resistance", HTTP_PUT, [this](AsyncWebServerRequest *request) {}, NULL, [this](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        this->handleApiSetResistance(request, data, len, index, total);
+      });
+
       // Fan Speed set
       this->server.on("/api/fan", HTTP_PUT, [this](AsyncWebServerRequest *request) {}, NULL, [this](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
         this->handleApiSetFanSpeed(request, data, len, index, total);
@@ -64,6 +74,11 @@ public:
       // Load disable
       this->server.on("/api/disable", HTTP_PUT, [this](AsyncWebServerRequest *request) {
         this->handleApiLoadEnable(request, false);
+      });
+
+      // Operating Mode set
+      this->server.on("/api/mode", HTTP_PUT, [this](AsyncWebServerRequest *request) {}, NULL, [this](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        this->handleApiSetMode(request, data, len, index, total);
       });
 
       // State get
@@ -175,6 +190,26 @@ private:
     this->sendFormattedJsonResponse(request, "OK");
   }
 
+  /** Handle Power set request. */
+  void handleApiSetPower(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+    String valueStr = this->readBody(data, len, index, total);
+    float power = atof(valueStr.c_str());
+
+    this->load.setPower(power);
+
+    this->sendFormattedJsonResponse(request, "OK");
+  }
+
+  /** Handle Resistance set request. */
+  void handleApiSetResistance(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+    String valueStr = this->readBody(data, len, index, total);
+    float resistance = atof(valueStr.c_str());
+
+    this->load.setResistance(resistance);
+
+    this->sendFormattedJsonResponse(request, "OK");
+  }
+
   /** Handle Fan Speed set request. */
   void handleApiSetFanSpeed(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
     String valueStr = this->readBody(data, len, index, total);
@@ -192,6 +227,31 @@ private:
     this->sendFormattedJsonResponse(request, "OK");
   }
 
+  /** Handle Operating Mode set request. */
+  void handleApiSetMode(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+    String valueStr = this->readBody(data, len, index, total);
+    valueStr.toUpperCase();
+    Load::Mode mode;
+    if (valueStr == "CONSTANT_CURRENT") {
+      mode = Load::CONSTANT_CURRENT;
+
+    } else if (valueStr == "CONSTANT_POWER") {
+      mode = Load::CONSTANT_POWER;
+
+    } else if (valueStr == "CONSTANT_RESISTANCE") {
+      mode = Load::CONSTANT_RESISTANCE;
+
+    } else {
+      // invalid mode
+      request->send(400, "application/json", "{ \"error\": \"Invalid mode\" }");
+      return;
+    }
+
+    this->load.setMode(mode);
+
+    this->sendFormattedJsonResponse(request, "OK");
+  }
+
   /** Handle DAC set request (service/test). */
   void handleApiSrvDacSet(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
     String valueStr = this->readBody(data, len, index, total);
@@ -205,12 +265,28 @@ private:
   /** Handle State get request */
   void handleApiGetState(AsyncWebServerRequest *request) {
     bool enabled = this->load.isEnabled();
+    Load::Mode mode = this->load.getMode();
     float setCurrent = this->load.getSetCurrent();
+    float setPower = this->load.getSetPower();
+    float setResistance = this->load.getSetResistance();
     float fanSpeed = this->load.getFanSpeed();
 
+    const char* modeStr = "";
+    switch (mode) {
+      case Load::CONSTANT_CURRENT:
+        modeStr = "CONSTANT_CURRENT";
+        break;
+      case Load::CONSTANT_POWER:
+        modeStr = "CONSTANT_POWER";
+        break;
+      case Load::CONSTANT_RESISTANCE:
+        modeStr = "CONSTANT_RESISTANCE";
+        break;
+    }
+
     this->sendFormattedJsonResponse(request,
-      "{ \"enabled\": %s, \"setCurrent\": %.3f, \"fanSpeed\": %.2f }",
-      enabled ? "true" : "false", setCurrent, fanSpeed);
+      "{ \"enabled\": %s, \"enabled\": %s, \"setCurrent\": %.3f, \"setPower\": %.3f, \"setResistance\": %.3f, \"fanSpeed\": %.2f }",
+      enabled ? "true" : "false", modeStr, setCurrent, setPower, setResistance, fanSpeed);
   }
 
   /** Handle DAC swipe request (service/test). */
@@ -257,7 +333,7 @@ private:
   /** Send formatted json response. */
   void sendFormattedJsonResponse(AsyncWebServerRequest *request, const char* format, ...) {
     // format response string
-    char buffer[128];
+    char buffer[256];
     va_list args; va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);

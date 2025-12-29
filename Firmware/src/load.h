@@ -12,23 +12,36 @@
 #include "fan.h"
 #include "hw.h"
 
-/** Digital to Analog Converter (DAC) implemented on hardware in R-2R configuration. */
+/** Main Electronic Load */
 class Load {
 
 public:
+
+  enum Mode {
+    CONSTANT_CURRENT,
+    CONSTANT_POWER,
+    CONSTANT_RESISTANCE
+  };
 
   /**
    * Instantiates the Electronic Load.
    */
   Load(DAC &dac, ADC &adc, Fan &fan, uint8_t pwrEnPin)
     : dac(dac), adc(adc), fan(fan), pwrEnPin(pwrEnPin),
-      enabled(false), current(0.0) {
+      enabled(false), mode(CONSTANT_CURRENT), current(0.0), power(0.0), resistance(10000000.0), fanSpeed(0.0) {
 
       digitalWrite(this->pwrEnPin, LOW);
   }
 
   void handle() {
     this->adc.handle();
+
+    if (this->mode == CONSTANT_POWER) {
+      this->adjustLoadCurrentForPower();
+
+    } else if (this->mode == CONSTANT_RESISTANCE) {
+      this->adjustLoadCurrentForResistance();
+    }
   }
 
   /** Get the Load Voltage (in volts). */
@@ -94,10 +107,49 @@ public:
     return true;
   }
 
+  /** Set operating mode */
+  bool setMode(Mode mode) {
+    if (this->mode == mode) {
+      // no state change
+      return true;
+    }
+
+    // set default values
+    this->power = 0.0;
+    this->resistance = 10000000.0;
+    this->setCurrent(0.0);
+
+    switch (mode)
+    {
+    case CONSTANT_CURRENT:
+      this->mode = CONSTANT_CURRENT;
+      this->setCurrent(0.0);
+      break;
+
+    case CONSTANT_POWER:
+      this->mode = CONSTANT_POWER;
+      break;
+
+    case CONSTANT_RESISTANCE:
+      this->mode = CONSTANT_RESISTANCE;
+      break;
+
+    default:
+      break;
+    }
+
+    return true;
+  }
+
   /** Set the Load Current (in amps) */
-  bool setCurrent(float current) {
+  bool setCurrent(float current, bool checkMode = true) {
     if ((current < 0.0) || (current > HardwareValues::MAX_TOTAL_CURRENT)) {
       // invalid set current value
+      return false;
+    }
+
+    if ((checkMode == true) && (this->mode != CONSTANT_CURRENT)) {
+      // invalid mode for setting current
       return false;
     }
 
@@ -117,6 +169,48 @@ public:
 
     // save state
     this->current = current;
+
+    return true;
+  }
+
+  /** Set the Load Power (in watts) */
+  bool setPower(float power) {
+    if ((power < 0.0) || (power > HardwareValues::MAX_TOTAL_POWER)) {
+      // invalid set power value
+      return false;
+    }
+
+    if ((this->mode != CONSTANT_POWER)) {
+      // invalid mode for setting power
+      return false;
+    }
+
+    // save state
+    this->power = power;
+
+    // adjust the load current to maintain the set power
+    this->adjustLoadCurrentForPower();
+
+    return true;
+  }
+
+  /** Set the Resistance (in ohms) */
+  bool setResistance(float resistance) {
+    if ((resistance < HardwareValues::MIN_TOTAL_RESISTANCE)) {
+      // invalid set resistance value
+      return false;
+    }
+
+    if ((this->mode != CONSTANT_RESISTANCE)) {
+      // invalid mode for setting resistance
+      return false;
+    }
+
+    // save state
+    this->resistance = resistance;
+
+    // adjust the load current to maintain the set resistance
+    this->adjustLoadCurrentForResistance();
 
     return true;
   }
@@ -181,9 +275,24 @@ public:
     return this->enabled;
   }
 
+  /** Get Operating Mode */
+  Mode getMode() {
+    return this->mode;
+  }
+
   /** Get set current */
   float getSetCurrent() {
     return this->current;
+  }
+
+  /** Get set power */
+  float getSetPower() {
+    return this->power;
+  }
+
+  /** Get set resistance */
+  float getSetResistance() {
+    return this->resistance;
   }
 
   /** Get fan speed */
@@ -202,11 +311,36 @@ private:
   /** Load state (enabled/disabled) */
   bool enabled;
 
+  /** Operating mode */
+  Mode mode;
+
   /** Set current */
   float current;
 
+  /** Set power */
+  float power;
+
+  /** Set resistance */
+  float resistance;
+
   /** Fan speed */
   float fanSpeed;
+
+  /** Adjust Load Current to maintain the set Power */
+  void adjustLoadCurrentForPower() {
+    float voltage = this->getLoadVoltage();
+    if (voltage > 0.0) {
+      float setCurrent = this->power / voltage;
+      this->setCurrent(setCurrent, false);
+    }
+  }
+
+  /** Adjust Load Current to maintain the set Resistance */
+  void adjustLoadCurrentForResistance() {
+    float voltage = this->getLoadVoltage();
+    float setCurrent = voltage / this->resistance;
+    this->setCurrent(setCurrent, false);
+  }
 
 };
 

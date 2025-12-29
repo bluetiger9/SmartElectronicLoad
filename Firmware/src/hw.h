@@ -81,6 +81,18 @@ public:
 
   static constexpr float MAX_TOTAL_CURRENT = MAX_CURRENT_PER_CHANNEL * NR_CHANNELS;
 
+  /**
+   * Max Allowed Power per Channel (in Watts)
+   */
+  static constexpr float MAX_POWER_PER_CHANNEL = 100.0;
+
+  static constexpr float MAX_TOTAL_POWER = MAX_POWER_PER_CHANNEL * NR_CHANNELS;
+
+  /** Min Allowed Resistance per Channel (in ohms) */
+  static constexpr float MIN_RESISTANCE_PER_CHANNEL = 0.5; // Ohm
+
+  static constexpr float MIN_TOTAL_RESISTANCE = MIN_RESISTANCE_PER_CHANNEL / NR_CHANNELS;
+
   /** Current Sense ADC Multiplier */
   static float currentSenseAdcMultiplier;
 
