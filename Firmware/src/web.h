@@ -121,6 +121,21 @@ public:
         this->handleApiEnableProtections(request);
       });
 
+      // Power auto-detect enable
+      this->server.on("/api/power/auto-detect/enable",  HTTP_POST, [this](AsyncWebServerRequest *request) {
+        this->handleApiSetPowerAutoDetect(request, true);
+      });
+
+      // Power auto-detect enable
+      this->server.on("/api/power/auto-detect/disable",  HTTP_POST, [this](AsyncWebServerRequest *request) {
+        this->handleApiSetPowerAutoDetect(request, false);
+      });
+
+            // Set over current limit
+      this->server.on("/api/power/auto-detect/delay", HTTP_PUT, [this](AsyncWebServerRequest *request) {}, NULL, [this](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        this->handleApiSetPowerAutoDetectDelay(request, data, len, index, total);
+      });
+
       /** Service / Test API Handler **/
 
       // DAC set
@@ -409,6 +424,23 @@ private:
   /** Handle Enable protections request */
   void handleApiEnableProtections(AsyncWebServerRequest *request) {
     bool success = this->load.enableProtections(false);
+
+    this->sendStatusResponse(request, success);
+  }
+
+  /** Handle power auto detection */
+  void handleApiSetPowerAutoDetect(AsyncWebServerRequest *request, bool enable) {
+    bool success = this->load.setAutoEnableDisableOnPower(enable);
+
+    this->sendStatusResponse(request, success);
+  }
+
+  /** Handle power auto detection delay set request */
+  void handleApiSetPowerAutoDetectDelay(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+    String valueStr = this->readBody(data, len, index, total);
+    uint32_t delayMs = atoi(valueStr.c_str());
+
+    bool success = this->load.setAutoEnableDelayMs(delayMs);
 
     this->sendStatusResponse(request, success);
   }

@@ -12,8 +12,6 @@
 #include "fan.h"
 #include "hw.h"
 
-#include "hal/gpio_hal.h"
-
 /** Main Electronic Load */
 class Load {
 
@@ -60,6 +58,9 @@ public:
 
       // check protections
       this->checkProtections();
+
+      // handle auto-enable / disable
+      this->handleAutoEnableDisable();
 
       // save the last processed ADC timestamp
       this->lastAdcTimestamp = this->adc.lastReadTimeMicros;
@@ -424,6 +425,28 @@ public:
     return true;
   }
 
+  /** Enable / disable power detection */
+  bool setAutoEnableDisableOnPower(bool enable) {
+    this->autoEnableDisableOnPower = enable;
+    return true;
+  }
+
+  /** Set auto-enable delay (in milliseconds) */
+  bool setAutoEnableDelayMs(uint16_t delayMs) {
+    this->autoEnableDelayMs = delayMs;
+    return true;
+  }
+
+  /** Get power detection state */
+  bool isAutoEnableDisableOnPower() {
+    return this->autoEnableDisableOnPower;
+  }
+
+  /** Get auto-enable delay (in milliseconds) */
+  uint16_t getAutoEnableDelayMs() {
+    return this->autoEnableDelayMs;
+  }
+
 private:
   DAC &dac;
   ADC &adc;
@@ -467,6 +490,14 @@ private:
 
   /** Last ADC timestamp processed */
   uint64_t lastAdcTimestamp = 0;
+
+  /** Auto-detect (/enable /disable) load when power is connected */
+  bool autoEnableDisableOnPower = true;
+
+  /** Auto-enable delay (3s) */
+  uint16_t autoEnableDelayMs = 3000;
+
+  uint64_t autoEnableDelayStartMs = 0;
 
   /** Adjust Load Current to maintain the set Power */
   void adjustLoadCurrentForPower() {
@@ -530,6 +561,7 @@ private:
     }
   }
 
+  /** Protection tripped */
   void tripped(ProtectState state) {
     // set current to 0A
     this->setCurrent(0.0, false);
@@ -541,6 +573,39 @@ private:
 
     // set state
     this->protectionState = state;
+  }
+
+  /** Auto enable / disable */
+  void handleAutoEnableDisable() {
+    if (!this->autoEnableDisableOnPower) {
+      return;
+    }
+
+    float voltage = this->getLoadVoltage();
+
+    // enable load when power is connected (>=1.0V)
+    if (!this->enabled && (voltage >= 1.0)) {
+      // power connected
+      uint64_t now = millis();
+      if (this->autoEnableDelayStartMs == 0) {
+        this->autoEnableDelayStartMs = now;
+        return;
+      }
+
+      if (now - this->autoEnableDelayStartMs >= this->autoEnableDelayMs) {
+        this->autoEnableDelayStartMs = 0;
+        this->setEnabled(true);
+        return;
+      }
+    }
+
+    // disable load when power is disconnected (<=0.5V)
+    if (this->enabled && (voltage <= 0.5)) {
+      // power disconnected
+      this->autoEnableDelayStartMs = 0;
+      this->setEnabled(false);
+      return;
+    }
   }
 
 };
