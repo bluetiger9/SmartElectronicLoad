@@ -86,6 +86,41 @@ public:
         this->handleApiGetState(request);
       });
 
+      // Set over temperature limit
+      this->server.on("/api/protections/over-temperature", HTTP_PUT, [this](AsyncWebServerRequest *request) {}, NULL, [this](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        this->handleApiSetOverTemperatureLimit(request, data, len, index, total);
+      });
+
+      // Set over current limit
+      this->server.on("/api/protections/over-current", HTTP_PUT, [this](AsyncWebServerRequest *request) {}, NULL, [this](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        this->handleApiSetOverCurrentLimit(request, data, len, index, total);
+      });
+
+      // Set over voltage limit
+      this->server.on("/api/protections/over-voltage", HTTP_PUT, [this](AsyncWebServerRequest *request) {}, NULL, [this](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        this->handleApiSetOverVoltageLimit(request, data, len, index, total);
+      });
+
+      // Set over current limit
+      this->server.on("/api/protections/over-power", HTTP_PUT, [this](AsyncWebServerRequest *request) {}, NULL, [this](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        this->handleApiSetOverPowerLimit(request, data, len, index, total);
+      });
+
+      // Reset protections
+      this->server.on("/api/protections/reset", HTTP_POST, [this](AsyncWebServerRequest *request) {
+        this->handleApiResetProtections(request);
+      });
+
+      // Disable protections
+      this->server.on("/api/protections/disable", HTTP_POST, [this](AsyncWebServerRequest *request) {
+        this->handleApiDisableProtections(request);
+      });
+
+      // Enable protections
+      this->server.on("/api/protections/enable", HTTP_POST, [this](AsyncWebServerRequest *request) {
+        this->handleApiEnableProtections(request);
+      });
+
       /** Service / Test API Handler **/
 
       // DAC set
@@ -185,9 +220,9 @@ private:
     String valueStr = this->readBody(data, len, index, total);
     float current = atof(valueStr.c_str());
 
-    this->load.setCurrent(current);
+    bool success = this->load.setCurrent(current);
 
-    this->sendFormattedJsonResponse(request, "OK");
+    this->sendStatusResponse(request, success);
   }
 
   /** Handle Power set request. */
@@ -195,9 +230,9 @@ private:
     String valueStr = this->readBody(data, len, index, total);
     float power = atof(valueStr.c_str());
 
-    this->load.setPower(power);
+    bool success = this->load.setPower(power);
 
-    this->sendFormattedJsonResponse(request, "OK");
+    this->sendStatusResponse(request, success);
   }
 
   /** Handle Resistance set request. */
@@ -205,9 +240,9 @@ private:
     String valueStr = this->readBody(data, len, index, total);
     float resistance = atof(valueStr.c_str());
 
-    this->load.setResistance(resistance);
+    bool success = this->load.setResistance(resistance);
 
-    this->sendFormattedJsonResponse(request, "OK");
+    this->sendStatusResponse(request, success);
   }
 
   /** Handle Fan Speed set request. */
@@ -215,16 +250,16 @@ private:
     String valueStr = this->readBody(data, len, index, total);
     float value = atof(valueStr.c_str());
 
-    this->load.setFanSpeed(value);
+    bool success = this->load.setFanSpeed(value);
 
-    this->sendFormattedJsonResponse(request, "OK");
+    this->sendStatusResponse(request, success);
   }
 
   /** Handle Load Enable / Disable request */
   void handleApiLoadEnable(AsyncWebServerRequest *request, bool enabled) {
-    this->load.setEnabled(enabled);
+    bool success = this->load.setEnabled(enabled);
 
-    this->sendFormattedJsonResponse(request, "OK");
+    this->sendStatusResponse(request, success);
   }
 
   /** Handle Operating Mode set request. */
@@ -247,9 +282,9 @@ private:
       return;
     }
 
-    this->load.setMode(mode);
+    bool success = this->load.setMode(mode);
 
-    this->sendFormattedJsonResponse(request, "OK");
+    this->sendStatusResponse(request, success);
   }
 
   /** Handle DAC set request (service/test). */
@@ -259,7 +294,7 @@ private:
 
     this->srv.dacSet(value);
 
-    this->sendFormattedJsonResponse(request, "OK");
+    this->sendStatusResponse(request, true);
   }
 
   /** Handle State get request */
@@ -284,16 +319,105 @@ private:
         break;
     }
 
+    const char* protectionStateStr = "";
+    switch (this->load.getProtectState()) {
+      case Load::OK:
+        protectionStateStr = "OK";
+        break;
+      case Load::OK_DISABLED:
+        protectionStateStr = "OK_DISABLED";
+        break;
+      case Load::TRIPPED_OVER_TEMPERATURE:
+        protectionStateStr = "TRIPPED_OVER_TEMPERATURE";
+        break;
+      case Load::TRIPPED_OVER_VOLTAGE:
+        protectionStateStr = "TRIPPED_OVER_VOLTAGE";
+        break;
+      case Load::TRIPPED_OVER_CURRENT:
+        protectionStateStr = "TRIPPED_OVER_CURRENT";
+        break;
+      case Load::TRIPPED_OVER_POWER:
+        protectionStateStr = "TRIPPED_OVER_POWER";
+        break;
+    }
+
+    float overTemperatureLimit = this->load.getOverTemperatureLimit();
+    float overCurrentLimit = this->load.getOverCurrentLimit();
+    float overVoltageLimit = this->load.getOverVoltageLimit();
+    float overPowerLimit = this->load.getOverPowerLimit();
+
     this->sendFormattedJsonResponse(request,
-      "{ \"enabled\": %s, \"enabled\": %s, \"setCurrent\": %.3f, \"setPower\": %.3f, \"setResistance\": %.3f, \"fanSpeed\": %.2f }",
-      enabled ? "true" : "false", modeStr, setCurrent, setPower, setResistance, fanSpeed);
+      "{ \"enabled\": %s, \"mode\": \"%s\", \"setCurrent\": %.3f, \"setPower\": %.3f, \"setResistance\": %.3f, \"fanSpeed\": %.2f, \"protections\": { \"state\": \"%s\", \"overTemperatureLimit\": %.2f, \"overCurrentLimit\": %.3f, \"overVoltageLimit\": %.3f, \"overPowerLimit\": %.3f } }",
+      enabled ? "true" : "false", modeStr, setCurrent, setPower, setResistance, fanSpeed,
+      protectionStateStr, overTemperatureLimit, overCurrentLimit, overVoltageLimit, overPowerLimit);
+  }
+
+  /** Handle Over temperature set request */
+  void handleApiSetOverTemperatureLimit(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+    String valueStr = this->readBody(data, len, index, total);
+    float temp = atof(valueStr.c_str());
+
+    bool success = this->load.setOverTemperatureLimit(temp);
+
+    this->sendStatusResponse(request, success);
+  }
+
+  /** Handle Over current set request */
+  void handleApiSetOverCurrentLimit(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+    String valueStr = this->readBody(data, len, index, total);
+    float current = atof(valueStr.c_str());
+
+    bool success = this->load.setOverCurrentLimit(current);
+
+    this->sendStatusResponse(request, success);
+  }
+
+  /** Handle Over voltage set request */
+  void handleApiSetOverVoltageLimit(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+    String valueStr = this->readBody(data, len, index, total);
+    float voltage = atof(valueStr.c_str());
+
+    bool success = this->load.setOverVoltageLimit(voltage);
+
+    this->sendStatusResponse(request, success);
+  }
+
+  /** Handle Over power set request */
+  void handleApiSetOverPowerLimit(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+    String valueStr = this->readBody(data, len, index, total);
+    float power = atof(valueStr.c_str());
+
+    bool success = this->load.setOverPowerLimit(power);
+
+    this->sendStatusResponse(request, success);
+  }
+
+  /** Handle Reset protections request */
+  void handleApiResetProtections(AsyncWebServerRequest *request) {
+    bool success = this->load.resetProtections();
+
+    this->sendStatusResponse(request, success);
+  }
+
+  /** Handle Disable protections request */
+  void handleApiDisableProtections(AsyncWebServerRequest *request) {
+    bool success = this->load.enableProtections(false);
+
+    this->sendStatusResponse(request, success);
+  }
+
+  /** Handle Enable protections request */
+  void handleApiEnableProtections(AsyncWebServerRequest *request) {
+    bool success = this->load.enableProtections(false);
+
+    this->sendStatusResponse(request, success);
   }
 
   /** Handle DAC swipe request (service/test). */
   void handleApiSrvDacSwipe(AsyncWebServerRequest *request) {
     this->srv.dacSwipe();
 
-    this->sendFormattedJsonResponse(request, "OK");
+    this->sendStatusResponse(request, true);
   }
 
   /** Handle OTA restart (service/test). */
@@ -330,10 +454,15 @@ private:
     request->send(404, "text/plain", "Not Found");
   }
 
+  /** Send status response. */
+  void sendStatusResponse(AsyncWebServerRequest *request, bool success) {
+    this->sendFormattedJsonResponse(request, "{ \"status\": \"%s\" }", success ? "OK" : "FAIL");
+  }
+
   /** Send formatted json response. */
   void sendFormattedJsonResponse(AsyncWebServerRequest *request, const char* format, ...) {
     // format response string
-    char buffer[256];
+    char buffer[512];
     va_list args; va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);

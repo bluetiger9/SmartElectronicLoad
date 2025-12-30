@@ -25,6 +25,15 @@ public:
     CONSTANT_RESISTANCE
   };
 
+  enum ProtectState {
+    OK,
+    OK_DISABLED, // DISABLED (conflict with the #DISABLED macro)
+    TRIPPED_OVER_TEMPERATURE,
+    TRIPPED_OVER_VOLTAGE,
+    TRIPPED_OVER_CURRENT,
+    TRIPPED_OVER_POWER
+  };
+
   /**
    * Instantiates the Electronic Load.
    */
@@ -48,6 +57,9 @@ public:
       } else if (this->mode == CONSTANT_RESISTANCE) {
         this->adjustLoadCurrentForResistance();
       }
+
+      // check protections
+      this->checkProtections();
 
       // save the last processed ADC timestamp
       this->lastAdcTimestamp = this->adc.lastReadTimeMicros;
@@ -96,6 +108,11 @@ public:
     if (this->enabled == enabled) {
       // no state change
       return true;
+    }
+
+    if ((enabled) && (this->protectionState > OK_DISABLED)) {
+      // cannot enable when in tripped state
+      return false;
     }
 
     if (enabled) {
@@ -163,6 +180,11 @@ public:
       return false;
     }
 
+    if ((current > 0.0) && (this->protectionState > OK_DISABLED)) {
+      // cannot set current when in tripped state
+      return false;
+    }
+
     if (current > 0.0) {
       // auto-enable load when set current is >= 0.0A (TODO: make this configurable)
       this->setEnabled(true);
@@ -187,6 +209,11 @@ public:
   bool setPower(float power) {
     if ((power < 0.0) || (power > HardwareValues::MAX_TOTAL_POWER)) {
       // invalid set power value
+      return false;
+    }
+
+    if ((power > 0.0) && (this->protectionState > OK_DISABLED)) {
+      // cannot set power when in tripped state
       return false;
     }
 
@@ -310,6 +337,93 @@ public:
     return this->fanSpeed;
   }
 
+  /** Get Protection State */
+  ProtectState getProtectState() {
+    return this->protectionState;
+  }
+
+  /** Set over temperature limit */
+  bool setOverTemperatureLimit(float temp) {
+    if (temp < 0.0) {
+      // invalid over temperature value
+      return false;
+    }
+
+    this->overTempC = temp;
+    return true;
+  }
+
+  /** Set over current limit */
+  bool setOverCurrentLimit(float current) {
+    if (current < 0.0) {
+      // invalid over current value
+      return false;
+    }
+
+    this->overCurrentA = current;
+    return true;
+  }
+
+  /** Set over voltage limit */
+  bool setOverVoltageLimit(float voltage) {
+    if (voltage < 0.0) {
+      // invalid over voltage value
+      return false;
+    }
+
+    this->overVoltageV = voltage;
+    return true;
+  }
+
+  /** Set over power limit */
+  bool setOverPowerLimit(float power) {
+    if (power < 0.0) {
+      // invalid over power value
+      return false;
+    }
+
+    this->overPowerW = power;
+    return true;
+  }
+
+  /** Get over temperature limit */
+  float getOverTemperatureLimit() {
+    return this->overTempC;
+  }
+
+  /** Get over current limit */
+  float getOverCurrentLimit() {
+    return this->overCurrentA;
+  }
+
+  /** Get over voltage limit */
+  float getOverVoltageLimit() {
+    return this->overVoltageV;
+  }
+
+  /** Get over power limit */
+  float getOverPowerLimit() {
+    return this->overPowerW;
+  }
+
+  /** Reset tripped protections */
+  bool resetProtections() {
+    this->protectionState = OK;
+    return true;
+  }
+
+  /** Enable protections */
+  bool enableProtections(bool enable = true) {
+    if (this->protectionState > OK_DISABLED) {
+      // tripped protections should be reset first
+      return false;
+    }
+
+    this->protectionState = enable ? OK : OK_DISABLED;
+
+    return true;
+  }
+
 private:
   DAC &dac;
   ADC &adc;
@@ -336,6 +450,21 @@ private:
   /** Fan speed */
   float fanSpeed;
 
+  /** Over temperature protection */
+  float overTempC = 80.0;
+
+  /** Over current protection */
+  float overCurrentA = 1.2 * HardwareValues::MAX_TOTAL_CURRENT;
+
+  /** Over voltage protection */
+  float overVoltageV = 100.0;
+
+  /** Over power protection */
+  float overPowerW = 400.0;
+
+  /** Protection state */
+  ProtectState protectionState = OK;
+
   /** Last ADC timestamp processed */
   uint64_t lastAdcTimestamp = 0;
 
@@ -353,6 +482,65 @@ private:
     float voltage = this->getLoadVoltage();
     float setCurrent = voltage / this->resistance;
     this->setCurrent(setCurrent, false);
+  }
+
+  /** Check protections */
+  void checkProtections() {
+    if (this->protectionState != OK) {
+      // already tripped or disabled
+      return;
+    }
+
+    // over temperature
+    if (this->overTempC > 0.0) {
+      float temperature = this->getTemperature();
+      if (temperature >= this->overTempC) {
+        tripped(TRIPPED_OVER_TEMPERATURE);
+        return;
+      }
+    }
+
+    // over voltage
+    if (this->overVoltageV > 0.0) {
+      float voltage = this->getLoadVoltage();
+      if (voltage >= this->overVoltageV) {
+        tripped(TRIPPED_OVER_VOLTAGE);
+        return;
+      }
+    }
+
+    // over current
+    if (this->overCurrentA > 0.0) {
+      float current = this->getLoadCurrent();
+      if (current >= this->overCurrentA) {
+        tripped(TRIPPED_OVER_CURRENT);
+        return;
+      }
+    }
+
+    // over power
+    if (this->overPowerW > 0.0) {
+      float voltage = this->getLoadVoltage();
+      float current = this->getLoadCurrent();
+      float power = voltage * current;
+      if (power >= this->overPowerW) {
+        tripped(TRIPPED_OVER_POWER);
+        return;
+      }
+    }
+  }
+
+  void tripped(ProtectState state) {
+    // set current to 0A
+    this->setCurrent(0.0, false);
+    this->power = 0.0;
+    this->resistance = 10000000.0;
+
+    // disable load
+    this->setEnabled(false);
+
+    // set state
+    this->protectionState = state;
   }
 
 };
