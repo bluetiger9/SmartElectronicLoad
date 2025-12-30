@@ -141,7 +141,8 @@ void controlLoopTask(void *pvParameters) {
       return;
     }
 
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    // TODO: why was a 1s delay here?
+    //vTaskDelay(1000 / portTICK_PERIOD_MS);
 
     // let other tasks run
     taskYIELD();

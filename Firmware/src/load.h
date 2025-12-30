@@ -12,6 +12,8 @@
 #include "fan.h"
 #include "hw.h"
 
+#include "hal/gpio_hal.h"
+
 /** Main Electronic Load */
 class Load {
 
@@ -36,11 +38,19 @@ public:
   void handle() {
     this->adc.handle();
 
-    if (this->mode == CONSTANT_POWER) {
-      this->adjustLoadCurrentForPower();
+    if (this->adc.lastReadTimeMicros > this->lastAdcTimestamp) {
+      // new ADC data available (this will run at ~4kHz rate)
 
-    } else if (this->mode == CONSTANT_RESISTANCE) {
-      this->adjustLoadCurrentForResistance();
+      // adjust load current based on the operating mode
+      if (this->mode == CONSTANT_POWER) {
+        this->adjustLoadCurrentForPower();
+
+      } else if (this->mode == CONSTANT_RESISTANCE) {
+        this->adjustLoadCurrentForResistance();
+      }
+
+      // save the last processed ADC timestamp
+      this->lastAdcTimestamp = this->adc.lastReadTimeMicros;
     }
   }
 
@@ -325,6 +335,9 @@ private:
 
   /** Fan speed */
   float fanSpeed;
+
+  /** Last ADC timestamp processed */
+  uint64_t lastAdcTimestamp = 0;
 
   /** Adjust Load Current to maintain the set Power */
   void adjustLoadCurrentForPower() {

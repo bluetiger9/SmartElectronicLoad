@@ -28,6 +28,7 @@ public:
   const uint8_t nrChannels;
   const uint8_t *pins;
   uint16_t *values;
+  uint64_t lastReadTimeMicros = 0;
 
   adc_continuous_data_t *result = NULL;
 
@@ -80,6 +81,7 @@ public:
 
   /** Consumes the continuous ADC read values (called by the continuous ADC callback) */
   void readContinuousValues() {
+    // note: analogContinuousRead() takes ~10us, which is bit slow
     if (!analogContinuousRead(&result, 0)) {
       Serial.println("Continuous ADC read ERROR!");
       return;
@@ -94,6 +96,8 @@ public:
       this->values[chan] = result[chan].avg_read_mvolts;
       #endif
     }
+
+    this->lastReadTimeMicros = micros();
   }
 
   void handle() {
