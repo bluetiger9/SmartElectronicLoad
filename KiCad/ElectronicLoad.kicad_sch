@@ -6442,7 +6442,7 @@
 		)
 		(uuid "7e6c5660-4e83-4ffa-958b-f225e62995e3")
 	)
-	(text "*div by X"
+	(text "*div by X (for 12V supply)"
 		(exclude_from_sim no)
 		(at 200.914 121.412 0)
 		(effects
@@ -7211,7 +7211,7 @@
 		(uuid "fb7f7628-5ea0-4d31-b948-03890069399d")
 	)
 	(no_connect
-		(at 146.05 229.87)
+		(at 54.61 224.79)
 		(uuid "276530a5-7552-421f-85cb-a86d0411c133")
 	)
 	(no_connect
@@ -9975,6 +9975,16 @@
 			(type default)
 		)
 		(uuid "90a14740-16fd-4dcc-a03b-f23a8a02439a")
+	)
+	(wire
+		(pts
+			(xy 148.59 229.87) (xy 146.05 229.87)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "90ae2f5d-ac22-4195-a4b0-d879092c16e7")
 	)
 	(wire
 		(pts
@@ -13508,22 +13518,22 @@
 	)
 	(global_label "PWR_C_SET_EN"
 		(shape input)
-		(at 54.61 224.79 180)
+		(at 148.59 229.87 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right)
+			(justify left)
 		)
 		(uuid "f92a5d4c-ce1e-4442-9c90-85c22d093078")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 37.655 224.79 0)
+			(at 165.545 229.87 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify right)
+				(justify left)
 				(hide yes)
 			)
 		)
@@ -26894,7 +26904,7 @@
 				)
 			)
 		)
-		(property "Value" "22"
+		(property "Value" "dnp"
 			(at 202.946 130.556 0)
 			(effects
 				(font
@@ -29224,7 +29234,7 @@
 				)
 			)
 		)
-		(property "Value" "22"
+		(property "Value" "dnp"
 			(at 202.946 143.256 0)
 			(effects
 				(font
