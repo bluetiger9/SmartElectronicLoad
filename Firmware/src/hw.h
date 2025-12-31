@@ -7,6 +7,7 @@
 #define HW_H
 
 #include <Arduino.h>
+#include "calib.h"
 
 /** Hardware Value */
 class HardwareValues {
@@ -153,6 +154,36 @@ public:
   static void initCurrentSetDacMultiplier() {
     currentSetDacMultiplier = (C_SENSE_MULTIPLIER * C_SENSE_RESISTOR / NR_CHANNELS / DAC_MULTIPLIER) * VOLTS_TO_DAC;
   }
+
+  /* Calibration Data (TODO: make this configuration) */
+
+  /** Voltage sense calibration (lower range) */
+  #if defined ESP32_S3
+    static constexpr Calibration::Entry VOLTAGE_SENSE_1_CALIBRATION[] = { { 1.0, 1.0 } };
+  #elif defined ESP32_S2
+    static constexpr Calibration::Entry VOLTAGE_SENSE_1_CALIBRATION[] = { { 0.000, 0.000 }, { 0.091, 0.010 },  { 0.250, 0.250 }, { 0.512, 0.500 }, { 0.741, 0.750 }, { 1.100, 1.01 }, { 1.504, 1.50 }, { 2.019, 2.000 }, { 3.019, 3.000 }, { 4.029, 4.000 }, { 5.038, 5.000 }, { 7.553, 7.500 }, { 10.087, 10.000 }, { 13.187, 13.000 }, { 13.188, 13.001 }};
+  #endif
+
+  /** Voltage sense calibration (upper range) */
+  #if defined ESP32_S3
+    static constexpr Calibration::Entry VOLTAGE_SENSE_2_CALIBRATION[] = { { 1.0, 1.0 } };
+  #elif defined ESP32_S2
+    static constexpr Calibration::Entry VOLTAGE_SENSE_2_CALIBRATION[] = { { 0.000, 0.000 }, { 0.053, 0.010 },  { 0.212, 0.250 }, { 0.531, 0.500 }, { 0.743, 0.750 }, { 1.061, 1.01 }, { 1.539, 1.50 }, { 2.069, 2.000 }, { 3.025, 3.000 }, { 4.033, 4.000 }, { 5.041, 5.000 }, { 7.535, 7.500 }, { 10.082, 10.000 }, { 13.107, 13.000 }, { 15.017, 15.00 }, { 19.740, 20.000 }, { 23.985, 25.000 }, { 28.283, 30.000 }, { 32.475, 35.000 }, { 36.720, 40.000 }, { 41.018, 45.000 }, { 45.263, 50.000 }, { 45.264, 50.010 } };
+  #endif
+
+  /** Current sense calibration (channel 1) */
+  #if defined ESP32_S3
+    static constexpr Calibration::Entry CURRENT_SENSE_1_CALIBRATION[] = { { 1.0, 1.0 } };
+  #elif defined ESP32_S2
+    static constexpr Calibration::Entry CURRENT_SENSE_1_CALIBRATION[] = { { 0.00, 0.00 }, { 0.10, 0.00 }, { 0.11, 0.00 }, { 0.20, 0.10 }, { 0.30, 0.10 }, { 0.30, 0.20 }, { 0.40, 0.30 }, { 0.50, 0.40 }, { 0.70, 0.60 }, { 0.70, 0.60 }, { 1.020, 0.90 }, { 1.100, 1.00 }, { 1.440, 1.289 } };
+  #endif
+
+  /** Current sense calibration (channel 2) */
+  #if defined ESP32_S3
+    static constexpr Calibration::Entry CURRENT_SENSE_2_CALIBRATION[] = { { 1.0, 1.0 } };
+  #elif defined ESP32_S2
+    static constexpr Calibration::Entry CURRENT_SENSE_2_CALIBRATION[] = { { 1.0, 1.0 } };
+  #endif
 
   static void init() {
     initLoadVoltageAdcMultiplier();

@@ -11,6 +11,7 @@
 #include "adc.h"
 #include "fan.h"
 #include "hw.h"
+#include "calib.h"
 
 /** Main Electronic Load */
 class Load {
@@ -73,13 +74,26 @@ public:
     uint16_t loadVoltageRaw1 = this->getLoadVoltage1Raw();
     if (loadVoltageRaw1 <= 2500) {
       // bellow ~2.5V threshold => use the 1st division stage
-      return loadVoltageRaw1 * HardwareValues::loadVoltageAdcMultiplier1;
+      return getLoadVoltage1();
 
     } else {
       // above ~2.5V threshold the 1st division stage may be saturated => use the 2nd division stage
-      uint16_t loadVoltageRaw2 = this->getLoadVoltage2Raw();
-      return loadVoltageRaw2 * HardwareValues::loadVoltageAdcMultiplier2;
+      return getLoadVoltage2();
     }
+  }
+
+  /** Get the lower range of load voltage (in volts). */
+  float getLoadVoltage1() {
+    uint16_t loadVoltageRaw1 = this->getLoadVoltage1Raw();
+    float voltage = loadVoltageRaw1 * HardwareValues::loadVoltageAdcMultiplier1;
+    return this->voltageSense1Calibration.getCalibratedValue(voltage);
+  }
+
+  /** Get the upper range of load voltage (in volts). */
+  float getLoadVoltage2() {
+    uint16_t loadVoltageRaw2 = this->getLoadVoltage2Raw();
+    float voltage = loadVoltageRaw2 * HardwareValues::loadVoltageAdcMultiplier2;
+    return this->voltageSense2Calibration.getCalibratedValue(voltage);
   }
 
   /** Get the full Load Current (in amps). */
@@ -90,7 +104,8 @@ public:
   /** Get the Load Current on channel one (in amps). */
   float getLoadCurrent1() {
     uint16_t loadCurrentRaw1 = this->adc.getMilliVolts(1);
-    return loadCurrentRaw1 * HardwareValues::currentSenseAdcMultiplier;
+    float current = loadCurrentRaw1 * HardwareValues::currentSenseAdcMultiplier;
+    return this->currentSense1Calibration.getCalibratedValue(current);
   }
 
   /** Get the Load Current on channel two (in amps). */
@@ -101,7 +116,8 @@ public:
     }
 
     uint16_t loadCurrentRaw2 = this->adc.getMilliVolts(2);
-    return loadCurrentRaw2 * HardwareValues::currentSenseAdcMultiplier;
+    float current = loadCurrentRaw2 * HardwareValues::currentSenseAdcMultiplier;
+    return this->currentSense2Calibration.getCalibratedValue(current);
   }
 
   /** Enable / Disable the Load */
@@ -497,7 +513,20 @@ private:
   /** Auto-enable delay (3s) */
   uint16_t autoEnableDelayMs = 3000;
 
+  /** Auto-enable delay start timestamp */
   uint64_t autoEnableDelayStartMs = 0;
+
+  /** Voltage low range calibration  */
+  Calibration voltageSense1Calibration = Calibration(HardwareValues::VOLTAGE_SENSE_1_CALIBRATION, sizeof(HardwareValues::VOLTAGE_SENSE_1_CALIBRATION) / sizeof(HardwareValues::VOLTAGE_SENSE_1_CALIBRATION[0]));
+
+  /** Voltage high range calibration  */
+  Calibration voltageSense2Calibration = Calibration(HardwareValues::VOLTAGE_SENSE_2_CALIBRATION, sizeof(HardwareValues::VOLTAGE_SENSE_2_CALIBRATION) / sizeof(HardwareValues::VOLTAGE_SENSE_2_CALIBRATION[0]));
+
+  /** Current sense calibration (channel 1) */
+  Calibration currentSense1Calibration = Calibration(HardwareValues::CURRENT_SENSE_1_CALIBRATION, sizeof(HardwareValues::CURRENT_SENSE_1_CALIBRATION) / sizeof(HardwareValues::CURRENT_SENSE_1_CALIBRATION[0]));
+
+  /** Current sense calibration (channel 2) */
+  Calibration currentSense2Calibration = Calibration(HardwareValues::CURRENT_SENSE_2_CALIBRATION, sizeof(HardwareValues::CURRENT_SENSE_2_CALIBRATION) / sizeof(HardwareValues::CURRENT_SENSE_2_CALIBRATION[0]));
 
   /** Adjust Load Current to maintain the set Power */
   void adjustLoadCurrentForPower() {

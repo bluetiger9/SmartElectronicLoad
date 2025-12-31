@@ -72,7 +72,6 @@ const uint8_t DAC_PINS[] = {
   DAC_PIN_12, DAC_PIN_13,
 };
 
-//const uint8_t NR_ADC_PINS = 5;
 const uint8_t NR_ADC_PINS = 5;
 
 const uint8_t ADC_PINS[] = {

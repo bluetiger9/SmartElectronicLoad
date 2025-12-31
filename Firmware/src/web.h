@@ -210,8 +210,10 @@ private:
   /** Handle Voltage get request. */
   void handleApiGetVoltage(AsyncWebServerRequest *request) {
     float loadVoltage = this->load.getLoadVoltage();
+    float loadVoltage1 = this->load.getLoadVoltage1();
+    float loadVoltage2 = this->load.getLoadVoltage2();
 
-    this->sendFormattedJsonResponse(request, "{ \"voltage\": %.3f }", loadVoltage);
+    this->sendFormattedJsonResponse(request, "{ \"voltage\": %.3f, \"voltage1\": %.3f, \"voltage2\": %.3f  }", loadVoltage, loadVoltage1, loadVoltage2);
   }
 
   /** Handle Current get request. */
