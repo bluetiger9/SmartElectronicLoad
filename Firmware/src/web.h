@@ -12,6 +12,7 @@
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
 #include "load.h"
+#include "shaper.h"
 #include "srv.h"
 
 /** Web / HTTP Server */
@@ -20,8 +21,8 @@ class WebServer {
 public:
 
   /**Instantiates the Web Server. */
-  WebServer(const uint16_t port, Load& load, Service &srv)
-    : server(AsyncWebServer(port)), load(load), srv(srv) {
+  WebServer(const uint16_t port, Load& load, Shaper &shaper, Service &srv)
+    : server(AsyncWebServer(port)), load(load), shaper(shaper), srv(srv) {
 
       DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
       DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST, PUT");
@@ -81,6 +82,11 @@ public:
         this->handleApiSetMode(request, data, len, index, total);
       });
 
+      // Pulse (shaper)
+      this->server.on("/api/shaper/pulse", HTTP_POST, [this](AsyncWebServerRequest *request) {}, NULL, [this](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        this->handleApiShaperPulse(request, data, len, index, total);
+      });
+
       // State get
       this->server.on("/api/state", HTTP_GET, [this](AsyncWebServerRequest *request) {
         this->handleApiGetState(request);
@@ -131,7 +137,7 @@ public:
         this->handleApiSetPowerAutoDetect(request, false);
       });
 
-            // Set over current limit
+      // Set over current limit
       this->server.on("/api/power/auto-detect/delay", HTTP_PUT, [this](AsyncWebServerRequest *request) {}, NULL, [this](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
         this->handleApiSetPowerAutoDetectDelay(request, data, len, index, total);
       });
@@ -201,6 +207,7 @@ public:
 private:
   AsyncWebServer server;
   Load& load;
+  Shaper& shaper;
   Service& srv;
 
   char contentIndexHtml[4096];
@@ -300,6 +307,23 @@ private:
     }
 
     bool success = this->load.setMode(mode);
+
+    this->sendStatusResponse(request, success);
+  }
+
+  /** Pulse */
+  void handleApiShaperPulse(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+    String currentAndDuration = this->readBody(data, len, index, total);
+    size_t separatorIdx = currentAndDuration.indexOf(',');
+    if (separatorIdx == -1) {
+      request->send(400, "application/json", "{ \"error\": \"Invalid parameters\" }");
+      return;
+    }
+
+    float current = atof(currentAndDuration.substring(0, separatorIdx).c_str());
+    uint32_t durationMicros = atoi(currentAndDuration.substring(separatorIdx + 1).c_str());
+
+    bool success = this->shaper.pulse(current, durationMicros);
 
     this->sendStatusResponse(request, success);
   }

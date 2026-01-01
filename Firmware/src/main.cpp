@@ -18,6 +18,7 @@
 #include "ota.h"
 #include "srv.h"
 #include "hw.h"
+#include "shaper.h"
 
 /* Pin Configuration */
 
@@ -86,11 +87,13 @@ Fan fan(FAN_PIN, 255);
 
 Load load(dac, adc, fan, LOAD_PWR_EN_PIN);
 
+Shaper shaper(load, 256);
+
 Wireless wifi;
 
 Service srv(dac, adc);
 
-WebServer webServer(80, load, srv);
+WebServer webServer(80, load, shaper, srv);
 
 OTA ota;
 
@@ -112,6 +115,7 @@ void controlLoopTask(void *pvParameters) {
   while (true) {
     for (uint64_t idx = 0; idx < 10000; idx++) {
       load.handle();
+      shaper.handle();
 
       // GPIO.out_w1tc = ((uint32_t) 1 << LED_PIN);
       // GPIO.out_w1tc = ((uint32_t) 1 << LED_PIN);
@@ -140,7 +144,8 @@ void controlLoopTask(void *pvParameters) {
     }
 
     // TODO: why was a 1s delay here?
-    //vTaskDelay(1000 / portTICK_PERIOD_MS);
+    //vTaskDelay(50 / portTICK_PERIOD_MS);
+    vTaskDelay(50 / portTICK_PERIOD_MS);
 
     // let other tasks run
     taskYIELD();
